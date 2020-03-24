@@ -5,7 +5,6 @@
     "react-native-keep-awake": "^2.0.6",
     "react-native-orientation": "^3.1.0",
     "react-native-slider": "https://github.com/abbasfreestyle/react-native-slider.git",
-    "react-native-video": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
