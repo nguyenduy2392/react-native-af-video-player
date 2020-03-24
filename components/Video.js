@@ -236,28 +236,32 @@ class Video extends Component {
   }
 
   toggleFS() {
-    this.setState({ fullScreen: !this.state.fullScreen }, () => {
-      Orientation.getOrientation((e, orientation) => {
-        if (this.state.fullScreen) {
-          const initialOrient = Orientation.getInitialOrientation()
-          const height = orientation !== initialOrient ?
-            Win.width : Win.height
-          this.props.onFullScreen(this.state.fullScreen)
-          if (this.props.rotateToFullScreen) Orientation.lockToLandscape()
-          this.animToFullscreen(height)
-        } else {
-          if (this.props.fullScreenOnly) {
-            this.setState({ paused: true }, () => this.props.onPlay(!this.state.paused))
+    if(this.props.handleFullScreenIgnoreOrientation) {
+      this.props.handleFullScreenIgnoreOrientation();
+    } else {
+      this.setState({ fullScreen: !this.state.fullScreen }, () => {
+        Orientation.getOrientation((e, orientation) => {
+          if (this.state.fullScreen) {
+            const initialOrient = Orientation.getInitialOrientation()
+            const height = orientation !== initialOrient ?
+              Win.width : Win.height
+            this.props.onFullScreen(this.state.fullScreen)
+            if (this.props.rotateToFullScreen) Orientation.lockToLandscape()
+            this.animToFullscreen(height)
+          } else {
+            if (this.props.fullScreenOnly) {
+              this.setState({ paused: true }, () => this.props.onPlay(!this.state.paused))
+            }
+            this.props.onFullScreen(this.state.fullScreen)
+            if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
+            this.animToInline()
+            setTimeout(() => {
+              if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
+            }, 1500)
           }
-          this.props.onFullScreen(this.state.fullScreen)
-          if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
-          this.animToInline()
-          setTimeout(() => {
-            if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
-          }, 1500)
-        }
+        })
       })
-    })
+    }
   }
 
   animToFullscreen(height) {
