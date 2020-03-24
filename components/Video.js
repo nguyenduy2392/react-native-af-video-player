@@ -261,6 +261,9 @@ class Video extends Component {
           }
         })
       })
+      if(this.props.handleFullScreen) {
+        this.props.handleFullScreen();
+      }
     }
   }
 
