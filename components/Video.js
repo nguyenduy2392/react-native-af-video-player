@@ -384,7 +384,7 @@ class Video extends Component {
           styles.background,
           fullScreen ?
             (styles.fullScreen, { height: this.animFullscreen })
-            : { height: this.animInline },
+            : { height: this.props.size ? this.props.size.height : this.animInline },
           fullScreen ? null : style
         ]}
       >
