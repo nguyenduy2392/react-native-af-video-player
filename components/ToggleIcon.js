@@ -37,7 +37,7 @@ const ToggleIcon = (props) => {
         <Icons
           style={padding}
           name={isOn ? iconOn : iconOff}
-          color={theme}
+          color={theme ? theme : 'white'}
           size={size}
         />
       </TouchableOpacity>
