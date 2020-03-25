@@ -14,7 +14,7 @@ import VideoPlayer from 'react-native-video'
 import KeepAwake from 'react-native-keep-awake'
 import Orientation from 'react-native-orientation'
 import Icons from 'react-native-vector-icons/MaterialIcons'
-import { Controls } from './'
+import { Controls, TopBar } from './'
 import { checkSource } from './utils'
 const Win = Dimensions.get('window')
 const backgroundColor = '#000'
@@ -177,10 +177,10 @@ class Video extends Component {
           type = error
           break
         case typeof error === 'object':
-          type = Alert.alert(error.title, error.message, error.button, error.options)
+          // type = Alert.alert(error.title, error.message, error.button, error.options)
           break
         default:
-          type = Alert.alert('Oops!', 'There was an error playing this video, please try again later.', [{ text: 'Close' }])
+          // type = Alert.alert('Oops!', 'There was an error playing this video, please try again later.', [{ text: 'Close' }])
           break
       }
       return type
@@ -314,26 +314,8 @@ class Video extends Component {
     }
   }
 
-  renderError() {
-    const { fullScreen } = this.state
-    const inline = {
-      height: this.animInline,
-      alignSelf: 'stretch'
-    }
-    const textStyle = { color: 'white', padding: 10 }
-    return (
-      <Animated.View
-        style={[styles.background, fullScreen ? styles.fullScreen : inline]}
-      >
-        <Text style={textStyle}>Retry</Text>
-        <Icons
-          name="replay"
-          size={60}
-          color={this.props.theme}
-          onPress={() => this.setState({ renderError: false })}
-        />
-      </Animated.View>
-    )
+  setStateError(error) {
+    this.setState(error)
   }
 
   renderPlayer() {
@@ -437,13 +419,16 @@ class Video extends Component {
           inlineOnly={inlineOnly}
           controlDuration={controlDuration}
           hideFullScreenControl={hideFullScreenControl}
+          renderError={this.state.renderError}
+          setStateError={(error) => this.setStateError(error)}
+          errorMess={this.props.errorMess}
         />
       </Animated.View>
     )
   }
 
   render() {
-    if (this.state.renderError) return this.renderError()
+    // if (this.state.renderError) return this.renderError()
     return this.renderPlayer()
   }
 }
