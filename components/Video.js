@@ -369,7 +369,8 @@ class Video extends Component {
     } = this.props
 
     const inline = {
-      height: inlineHeight,
+      minHeight: inlineHeight,
+      flex: 1,
       alignSelf: 'stretch'
     }
 
@@ -384,7 +385,7 @@ class Video extends Component {
           styles.background,
           fullScreen ?
             (styles.fullScreen, { height: this.animFullscreen })
-            : { height: this.props.size ? this.props.size.height : this.animInline },
+            : {flex: 1, height: this.props.size ? this.props.size.height : this.animInline },
           fullScreen ? null : style
         ]}
       >
