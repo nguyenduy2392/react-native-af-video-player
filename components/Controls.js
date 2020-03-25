@@ -4,7 +4,8 @@ import {
   View,
   Animated,
   StyleSheet,
-  TouchableWithoutFeedback as Touchable
+  TouchableWithoutFeedback as Touchable,
+  Text
 } from 'react-native'
 import {
   PlayButton,
@@ -13,6 +14,7 @@ import {
   TopBar,
   ProgressBar
 } from './'
+import Icons from 'react-native-vector-icons/MaterialIcons'
 
 const styles = StyleSheet.create({
   container: {
@@ -21,6 +23,11 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1
+  },
+  containerCenter: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 })
 
@@ -106,9 +113,60 @@ class Controls extends Component {
   }
 
   loading() {
+    const {
+      logo,
+      more,
+      onMorePress,
+      title,
+      theme,
+    } = this.props
     return (
       <View style={styles.container}>
+        <TopBar
+          title={title}
+          logo={logo}
+          more={more}
+          onMorePress={() => onMorePress()}
+          theme={{ title: theme.title, more: theme.more }}
+        />
         <Loading theme={this.props.theme.loading} />
+      </View>
+    )
+  }
+
+  renderError() {
+    const {
+      logo,
+      more,
+      onMorePress,
+      title,
+      theme
+    } = this.props
+    // const inline = {
+    //   height: this.animInline,
+    //   alignSelf: 'stretch'
+    // }
+    const textStyle = { color: 'white', padding: 10 }
+    return (
+      <View style={styles.container}>
+        {more &&
+          <TopBar
+            title={title}
+            logo={logo}
+            more={more}
+            onMorePress={() => onMorePress()}
+            theme={{ title: theme.title, more: theme.more }}
+          />
+        }
+        <View style={styles.containerCenter}>
+          <Text style={textStyle}>{this.props.errorMess ? this.props.errorMess : 'Retry'}</Text>
+          <Icons
+            name="replay"
+            size={60}
+            color={this.props.theme && this.props.theme.center ? this.props.theme.center : 'white'}
+            onPress={() => this.props.setStateError({ renderError: false })}
+          />
+        </View>
       </View>
     )
   }
@@ -173,6 +231,7 @@ class Controls extends Component {
   }
 
   render() {
+    if (this.props.renderError) return this.renderError()
     if (this.props.loading) return this.loading()
     if (this.state.hideControls) {
       return this.hiddenControls()
