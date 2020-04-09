@@ -127,7 +127,7 @@ class Video extends Component {
     if (!loop) this.pause()
     this.onSeekRelease(0)
     this.setState({ currentTime: 0 }, () => {
-      if (!loop) this.controls.showControls()
+      if (!loop && this.controls) this.controls.showControls()
     })
   }
 
