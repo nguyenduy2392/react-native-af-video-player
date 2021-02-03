@@ -14,6 +14,7 @@ import VideoPlayer from 'react-native-video'
 import KeepAwake from 'react-native-keep-awake'
 import Orientation from 'react-native-orientation'
 import Icons from 'react-native-vector-icons/MaterialIcons'
+import Lightbox from 'react-native-lightbox';
 import { Controls, TopBar } from './'
 import { checkSource } from './utils'
 const Win = Dimensions.get('window')
@@ -27,13 +28,17 @@ const styles = StyleSheet.create({
     zIndex: 98
   },
   fullScreen: {
-    ...StyleSheet.absoluteFillObject
+    ...StyleSheet.absoluteFillObject,
   },
   image: {
     ...StyleSheet.absoluteFillObject,
     width: undefined,
     height: undefined,
     zIndex: 99
+  },
+  container: {
+    width: '100%',
+    height: '100%'
   }
 })
 
@@ -51,7 +56,7 @@ const defaultTheme = {
   loading: '#FFF'
 }
 
-class Video extends Component {
+class Video extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {
@@ -83,11 +88,13 @@ class Video extends Component {
   }
 
   onLoadStart() {
-    this.setState({ paused: true, loading: true })
+    // this.setState({ paused: true, loading: true })
   }
 
   onLoad(data) {
-    if (!this.state.loading) return
+    if (this.loadInfo) return
+    this.loadInfo = true
+    // if (!this.state.loading) return
     this.props.onLoad(data)
     const { height, width } = data.naturalSize
     const ratio = height === 'undefined' && width === 'undefined' ?
@@ -194,9 +201,9 @@ class Video extends Component {
         this.props.onFullScreen(this.state.fullScreen)
         if (this.props.fullScreenOnly && !this.state.paused) this.togglePlay()
         if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
-        setTimeout(() => {
-          if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
-        }, 1500)
+        // setTimeout(() => {
+        //   if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
+        // }, 1500)
       })
       return true
     }
@@ -212,7 +219,7 @@ class Video extends Component {
   }
 
   togglePlay() {
-    if(this.props.handlePlayIgnoreOrientation) {
+    if (this.props.handlePlayIgnoreOrientation) {
       this.props.handleFullScreenIgnoreOrientation();
     } else {
       this.setState({ paused: !this.state.paused }, () => {
@@ -223,9 +230,10 @@ class Video extends Component {
             if (this.props.fullScreenOnly && !this.state.fullScreen) {
               this.setState({ fullScreen: true }, () => {
                 this.props.onFullScreen(this.state.fullScreen)
-                const initialOrient = Orientation.getInitialOrientation()
-                const height = orientation !== initialOrient ?
-                  Win.width : Win.height
+                // const initialOrient = Orientation.getInitialOrientation()
+                // const height = orientation !== initialOrient ?
+                //   Win.width : Win.height
+                const height = Win.width
                 this.animToFullscreen(height)
                 if (this.props.rotateToFullScreen) Orientation.lockToLandscape()
               })
@@ -240,15 +248,33 @@ class Video extends Component {
   }
 
   toggleFS() {
-    if(this.props.handleFullScreenIgnoreOrientation) {
+    this.setState({ fullScreen: !this.state.fullScreen }, () => {
+      this.props.onFullScreen(this.state.fullScreen)
+    })
+
+    if (this.lightboxRef) {
+      if (!this.lightOpen) {
+        this.lightOpen = true
+        this.lightboxRef.open()
+      } else {
+        if (this.state.fullScreen) {
+          this.lightOpen = false
+          this.lightboxRef.close()
+        }
+        this.setState({ fullScreen: !this.state.fullScreen })
+      }
+
+    }
+    if (this.props.handleFullScreenIgnoreOrientation) {
       this.props.handleFullScreenIgnoreOrientation();
     } else {
       this.setState({ fullScreen: !this.state.fullScreen }, () => {
         Orientation.getOrientation((e, orientation) => {
           if (this.state.fullScreen) {
-            const initialOrient = Orientation.getInitialOrientation()
-            const height = orientation !== initialOrient ?
-              Win.width : Win.height
+            // const initialOrient = Orientation.getInitialOrientation()
+            // const height = orientation !== initialOrient ?
+            //   Win.width : Win.height
+            const height = Win.width
             this.props.onFullScreen(this.state.fullScreen)
             if (this.props.rotateToFullScreen) Orientation.lockToLandscape()
             this.animToFullscreen(height)
@@ -259,19 +285,20 @@ class Video extends Component {
             this.props.onFullScreen(this.state.fullScreen)
             if (this.props.rotateToFullScreen) Orientation.lockToPortrait()
             this.animToInline()
-            setTimeout(() => {
-              if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
-            }, 1500)
+            // setTimeout(() => {
+            //   if (!this.props.lockPortraitOnFsExit) Orientation.unlockAllOrientations()
+            // }, 1500)
           }
         })
       })
-      if(this.props.handleFullScreen) {
+      if (this.props.handleFullScreen) {
         this.props.handleFullScreen();
       }
     }
   }
 
   animToFullscreen(height) {
+    console.log(height)
     Animated.parallel([
       Animated.timing(this.animFullscreen, { toValue: height, duration: 200 }),
       Animated.timing(this.animInline, { toValue: height, duration: 200 })
@@ -280,6 +307,7 @@ class Video extends Component {
 
   animToInline(height) {
     const newHeight = height || this.state.inlineHeight
+    console.log(newHeight)
     Animated.parallel([
       Animated.timing(this.animFullscreen, { toValue: newHeight, duration: 100 }),
       Animated.timing(this.animInline, { toValue: this.state.inlineHeight, duration: 100 })
@@ -293,6 +321,7 @@ class Video extends Component {
   seek(percent) {
     const currentTime = percent * this.state.duration
     this.setState({ seeking: true, currentTime })
+    // this.seekTo(currentTime)
   }
 
   seekTo(seconds) {
@@ -316,6 +345,10 @@ class Video extends Component {
 
   setStateError(error) {
     this.setState(error)
+  }
+
+  setLightboxRef = (ref) => {
+    this.lightboxRef = ref
   }
 
   renderPlayer() {
@@ -362,16 +395,17 @@ class Video extends Component {
     }
 
     return (
+      // <Lightbox ref={this.setLightboxRef} style={styles.container}>
       <Animated.View
         style={[
           styles.background,
           fullScreen ?
             (styles.fullScreen, { height: this.animFullscreen })
-            : {flex: 1, height: this.props.size ? this.props.size.height : this.animInline },
+            : { flex: 1, height: this.props.size ? this.props.size.height : this.animInline },
           fullScreen ? null : style
         ]}
       >
-        <StatusBar hidden={fullScreen} />
+        {/* <StatusBar hidden={fullScreen} /> */}
         {
           ((loading && placeholder) || currentTime < 0.01) &&
           <Image resizeMode="cover" style={styles.image} {...checkSource(placeholder)} />
@@ -428,6 +462,7 @@ class Video extends Component {
           />
         }
       </Animated.View>
+//</Lightbox>
     )
   }
 
@@ -493,14 +528,14 @@ Video.defaultProps = {
   playWhenInactive: false,
   rotateToFullScreen: false,
   lockPortraitOnFsExit: false,
-  onEnd: () => {},
-  onLoad: () => {},
-  onPlay: () => {},
-  onError: () => {},
-  onProgress: () => {},
+  onEnd: () => { },
+  onLoad: () => { },
+  onPlay: () => { },
+  onError: () => { },
+  onProgress: () => { },
   onMorePress: undefined,
-  onFullScreen: () => {},
-  onTimedMetadata: () => {},
+  onFullScreen: () => { },
+  onTimedMetadata: () => { },
   rate: 1,
   volume: 1,
   lockRatio: undefined,
