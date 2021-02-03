@@ -99,7 +99,10 @@ onPlay                | function | No       | (playing) => {}           | Return
 error                 | boolean, object | No | true                     | Pass in an object to Alert. See https://facebook.github.io/react-native/docs/alert.html
 theme                 | object   | No       | all white                 | Pass in an object to theme. (See example below to see the full list of available settings)
 controlDuration             | number   | No       | 3                 | Set the visibility time of the pause button and the progress bar after the video was started
+miniRunOnScreen
 
+miniRunOnScreen true. onFullScreen will open new tab
+miniRunOnScreen false. onFullScreen will play video in this screen (remove other UI when onFullScreen call back)
 ## Referencing
 
 To toggle play/pause manually, you can do it like so:
