@@ -414,7 +414,7 @@ class Video extends React.PureComponent {
         {/* <StatusBar hidden={fullScreen} /> */}
         {
           ((loading && placeholder) || currentTime < 0.01) &&
-          <Image resizeMode="cover" style={styles.image} {...checkSource(placeholder)} />
+          <Image resizeMode="cover" resizeMethod='resize' style={styles.image} {...checkSource(placeholder)} />
         }
         <VideoPlayer
           {...checkSource(url)}
