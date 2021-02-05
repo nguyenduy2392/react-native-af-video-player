@@ -140,7 +140,7 @@ class Video extends React.PureComponent {
 
   onRotated({ window: { width, height } }) {
     // Add this condition incase if inline and fullscreen options are turned on
-    if (this.props.inlineOnly) return
+    if (this.props.inlineOnly || this.props.miniRunOnScreen) return
     const orientation = width > height ? 'LANDSCAPE' : 'PORTRAIT'
     if (this.props.rotateToFullScreen) {
       if (orientation === 'LANDSCAPE') {
@@ -298,10 +298,9 @@ class Video extends React.PureComponent {
       }
     } else {
       if (this.state.fullScreen) {
-        // this.animToInline()
         Orientation.lockToPortrait()
       }
-      this.props.onFullScreen()
+      this.props.onFullScreen(!this.state.fullScreen)
     }
   }
 
